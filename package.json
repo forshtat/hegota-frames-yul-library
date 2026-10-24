@@ -30,6 +30,10 @@
     "./tx": {
       "types": "./dist/tx/index.d.ts",
       "default": "./dist/tx/index.js"
+    },
+    "./solidity": {
+      "types": "./dist/solidity/index.d.ts",
+      "default": "./dist/solidity/index.js"
     }
   },
   "scripts": {
@@ -44,15 +48,22 @@
     "verify": "yarn typecheck && yarn test && yarn build && yarn smoke && yarn check:helpers && yarn test:sol",
     "build:helpers": "node scripts/build-helpers.mjs",
     "check:helpers": "yarn build:helpers && git diff --exit-code -- contracts/generated",
-    "test:sol": "forge test"
+    "test:sol": "forge test",
+    "prepare": "yarn build"
   },
   "peerDependencies": {
-    "viem": "^2.57.0"
+    "viem": "^2.57.0",
+    "solc": "0.8.28"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
     "solc": "0.8.28",
     "typescript": "^5.9.3",
     "viem": "^2.57.10"
+  },
+  "peerDependenciesMeta": {
+    "solc": {
+      "optional": true
+    }
   }
 }

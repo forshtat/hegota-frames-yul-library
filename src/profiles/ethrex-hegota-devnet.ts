@@ -27,7 +27,7 @@ export const profile: Profile = {
   frameModes: { DEFAULT: 0, VERIFY: 1, SENDER: 2, POST_TX: 3 },
   approveScopes: { NONE: 0x0, PAYMENT: 0x1, EXECUTION: 0x2, EXECUTION_AND_PAYMENT: 0x3 },
   flagBits: {},
-  sigSchemes: { SECP256K1: 0x1 },
+  sigSchemes: { ARBITRARY: 0x0, SECP256K1: 0x1 }, // ARBITRARY accepted: probed on the devnet, 2026-10-24
   entryPoint: "0x00000000000000000000000000000000000000aa",
   predeploys: {}, // not checked on this devnet yet
 

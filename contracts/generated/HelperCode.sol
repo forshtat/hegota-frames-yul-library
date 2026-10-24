@@ -9,31 +9,37 @@ import {Devnet} from "../Devnet.sol";
 library HelperCode {
     function approve(Devnet devnet) internal pure returns (bytes memory) {
         if (devnet == Devnet.ERC8421_WORKSHOP) return hex"6007600d60003960076000f3fe600035600080aa";
+        if (devnet == Devnet.EIP7906_WORKSHOP) return hex"6007600d60003960076000f3fe600035600080aa";
         return "";
     }
 
     function txParam(Devnet devnet) internal pure returns (bytes memory) {
         if (devnet == Devnet.ERC8421_WORKSHOP) return hex"600c600d600039600c6000f3fe600035b060005260206000f3";
+        if (devnet == Devnet.EIP7906_WORKSHOP) return hex"600c600d600039600c6000f3fe600035b060005260206000f3";
         return "";
     }
 
     function frameDataLoad(Devnet devnet) internal pure returns (bytes memory) {
         if (devnet == Devnet.ERC8421_WORKSHOP) return hex"600f600d600039600f6000f3fe602035600035b160005260206000f3";
+        if (devnet == Devnet.EIP7906_WORKSHOP) return hex"600f600d600039600f6000f3fe602035600035b160005260206000f3";
         return "";
     }
 
     function frameDataCopy(Devnet devnet) internal pure returns (bytes memory) {
         if (devnet == Devnet.ERC8421_WORKSHOP) return hex"6012600d60003960126000f3fe6040356020356000356000b26020356000f3";
+        if (devnet == Devnet.EIP7906_WORKSHOP) return hex"6012600d60003960126000f3fe6040356020356000356000b26020356000f3";
         return "";
     }
 
     function frameParam(Devnet devnet) internal pure returns (bytes memory) {
         if (devnet == Devnet.ERC8421_WORKSHOP) return hex"600f600d600039600f6000f3fe602035600035b360005260206000f3";
+        if (devnet == Devnet.EIP7906_WORKSHOP) return hex"600f600d600039600f6000f3fe602035600035b360005260206000f3";
         return "";
     }
 
     function sigParam(Devnet devnet) internal pure returns (bytes memory) {
         if (devnet == Devnet.ERC8421_WORKSHOP) return hex"600f600d600039600f6000f3fe602035600035b460005260206000f3";
+        if (devnet == Devnet.EIP7906_WORKSHOP) return hex"600f600d600039600f6000f3fe602035600035b460005260206000f3";
         return "";
     }
 

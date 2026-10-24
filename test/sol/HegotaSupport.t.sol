@@ -36,11 +36,12 @@ contract HegotaSupportTest {
         _expectOtherFailure(address(h), abi.encodeCall(Harness.callSigparam, (0, SigParam.RESOLVED_SIGNER)));
     }
 
-    function test_eip7906_has_the_eip7906_opcodes_and_not_the_eip8141_ones() external {
+    function test_eip7906_has_both_families_except_sigdatacopy() external {
         Harness h = new Harness(Devnet.EIP7906_WORKSHOP);
-        _expectUnsupported(address(h), abi.encodeCall(Harness.callApprove, (Scope.PAYMENT)), Devnet.EIP7906_WORKSHOP, Opcode.Approve);
-        _expectUnsupported(address(h), abi.encodeCall(Harness.callTxparam, (TxParam.NONCE)), Devnet.EIP7906_WORKSHOP, Opcode.TxParam);
-        _expectUnsupported(address(h), abi.encodeCall(Harness.callSigparam, (0, SigParam.SCHEME)), Devnet.EIP7906_WORKSHOP, Opcode.SigParam);
+        // ethrex hegota-devnet halts on 0xb5, so it has no SIGDATACOPY helper
+        _expectUnsupported(address(h), abi.encodeCall(Harness.callSigdatacopy, (0, 1, 0)), Devnet.EIP7906_WORKSHOP, Opcode.SigDataCopy);
+        _expectOtherFailure(address(h), abi.encodeCall(Harness.callTxparam, (TxParam.NONCE)));
+        _expectOtherFailure(address(h), abi.encodeCall(Harness.callSigparam, (0, SigParam.SCHEME)));
         _expectOtherFailure(address(h), abi.encodeCall(Harness.callTxtrace, (0, TxTrace.GAS_PAYER)));
         _expectOtherFailure(address(h), abi.encodeCall(Harness.callEventdatacopy, (0, 0, 32)));
     }
@@ -63,6 +64,8 @@ contract HegotaSupportTest {
         _checkByte(Devnet.ERC8421_WORKSHOP, Opcode.FrameParam, 0xb3);
         _checkByte(Devnet.ERC8421_WORKSHOP, Opcode.SigParam, 0xb4);
         _checkByte(Devnet.ERC8421_WORKSHOP, Opcode.SigDataCopy, 0xb5);
+        _checkByte(Devnet.EIP7906_WORKSHOP, Opcode.Approve, 0xaa);
+        _checkByte(Devnet.EIP7906_WORKSHOP, Opcode.SigParam, 0xb4);
         _checkByte(Devnet.EIP7906_WORKSHOP, Opcode.TxTrace, 0xb6);
         _checkByte(Devnet.EIP7906_WORKSHOP, Opcode.EventDataCopy, 0xb7);
     }
@@ -113,7 +116,7 @@ contract HegotaSupportTest {
 
     function _has(Devnet devnet, Opcode opcode) private pure returns (bool) {
         if (devnet == Devnet.ERC8421_WORKSHOP) return uint256(opcode) <= uint256(Opcode.SigDataCopy);
-        return opcode == Opcode.TxTrace || opcode == Opcode.EventDataCopy;
+        return opcode != Opcode.SigDataCopy;
     }
 
     function _expectUnsupported(address target, bytes memory data, Devnet devnet, Opcode opcode) private {

@@ -68,13 +68,13 @@ contract VasiliyPaymaster is HegotaSupport(Devnet.ERC8421_WORKSHOP) {
 
 | Function | Opcode | Devnets |
 |---|---|---|
-| `approve(scope)` | APPROVE | `ERC8421_WORKSHOP` |
-| `txparam(param)` | TXPARAM | `ERC8421_WORKSHOP` |
-| `framedataload(offset, frameIndex)` | FRAMEDATALOAD | `ERC8421_WORKSHOP` |
-| `framedatacopy(dataOffset, length, frameIndex)` | FRAMEDATACOPY | `ERC8421_WORKSHOP` |
-| `frameparam(frameIndex, param)` | FRAMEPARAM | `ERC8421_WORKSHOP` |
-| `sigparam(signatureIndex, param)` | SIGPARAM | `ERC8421_WORKSHOP` |
-| `sigdatacopy(dataOffset, length, signatureIndex)` | SIGDATACOPY | `ERC8421_WORKSHOP` |
+| `approve(scope)` | APPROVE | both |
+| `txparam(param)` | TXPARAM | both |
+| `framedataload(offset, frameIndex)` | FRAMEDATALOAD | both |
+| `framedatacopy(dataOffset, length, frameIndex)` | FRAMEDATACOPY | both |
+| `frameparam(frameIndex, param)` | FRAMEPARAM | both |
+| `sigparam(signatureIndex, param)` | SIGPARAM | both |
+| `sigdatacopy(dataOffset, length, signatureIndex)` | SIGDATACOPY | `ERC8421_WORKSHOP` (from the EIP text) |
 | `txtrace(in2, param)` | TXTRACE | `EIP7906_WORKSHOP` |
 | `eventdatacopy(eventIndex, dataOffset, length)` | EVENTDATACOPY | `EIP7906_WORKSHOP` |
 
@@ -101,10 +101,14 @@ Mapping to profiles: `ERC8421_WORKSHOP` is `ethrex-eip8141-tracer` (chain 1337) 
 
 ### How much to trust a helper
 
-- *Verified on the devnet* (`APPROVE`, `SIGPARAM` on `ERC8421_WORKSHOP`; `TXTRACE`, `EVENTDATACOPY` on
-  `EIP7906_WORKSHOP`): exercised by a workshop, so the byte and operand order are known good.
-- *From the EIP text*: the rest. They may differ from what the client implements.
-- The 8141 helpers are not provided for `EIP7906_WORKSHOP` until something exercises them there.
+- *Verified on the devnet*: `APPROVE` and `SIGPARAM` on `ERC8421_WORKSHOP` (a workshop uses them); `TXTRACE` and
+  `EVENTDATACOPY` on `EIP7906_WORKSHOP` (the other workshop); and on `EIP7906_WORKSHOP` also `APPROVE`, `TXPARAM`,
+  `FRAMEDATALOAD`, `FRAMEDATACOPY`, `FRAMEPARAM` and `SIGPARAM`, each run by a probe contract in a VERIFY frame under
+  `ethrex_simulateFrameTransaction` on 2026-10-24, with the answers checked.
+- *From the EIP text*: the rest (`TXPARAM`, `FRAMEDATALOAD`, `FRAMEDATACOPY`, `FRAMEPARAM`, `SIGDATACOPY` on
+  `ERC8421_WORKSHOP`). They may differ from what the client implements.
+- `SIGDATACOPY` is not on `EIP7906_WORKSHOP`: the devnet halts on `0xb5`, even for a zero-length copy of an `ARBITRARY`
+  signature (which the devnet otherwise accepts, and `SIGPARAM` reads its length).
 - Forge and Hardhat's simulated chains do not know these opcodes, so `yarn test:sol` checks the wiring (which
   helper each devnet gets, its code, the ids) and not the opcodes themselves. Those run only on a devnet.
 
@@ -137,7 +141,7 @@ edit the new file, `yarn pin-vectors <id>`, `yarn verify`. The old profile stays
 
 - Skandha's `eth_sendFrameTransaction` JSON shape (still in the workshops)
 - Workshop-level transaction builders with their gas numbers (they stay in the workshops)
-- 8141 introspection helpers on `EIP7906_WORKSHOP` (unverified there)
+- `SIGDATACOPY` on `EIP7906_WORKSHOP` (the devnet halts on `0xb5`); `TXDIFF` (`0xb8`), whose stack layout is not recorded
 
 ## Development
 
