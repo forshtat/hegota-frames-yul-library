@@ -12,6 +12,15 @@ enum Scope {
     EXECUTION_AND_PAYMENT
 }
 
+/// The mode of a frame, as `frameparam(i, FrameParam.MODE)` reports it. POST_TX exists on the EIP-7906 devnet only
+/// (the current EIP-7906 text calls the mode ASSERT).
+enum FrameMode {
+    DEFAULT,
+    VERIFY,
+    SENDER,
+    POST_TX
+}
+
 /// EIP-8141 TXPARAM ids, with the keyed-nonce ids 0x0d to 0x10 of EIP-8250.
 enum TxParam {
     TYPE,

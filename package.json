@@ -34,7 +34,8 @@
     "./solidity": {
       "types": "./dist/solidity/index.d.ts",
       "default": "./dist/solidity/index.js"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
