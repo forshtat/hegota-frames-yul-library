@@ -1,6 +1,5 @@
 /**
- * Removes a profile: its file, its pinned vectors and its registry entry. `yarn build:yul` then drops its generated
- * bytecode.
+ * Removes a profile: its file, its pinned vectors and its registry entry.
  *
  *   yarn remove-profile <id>
  *
@@ -34,4 +33,4 @@ const registry = fs
 fs.writeFileSync(registryPath, registry);
 fs.rmSync(file);
 fs.rmSync(`${root}test/vectors/${id}.ts`, { force: true });
-console.log(`removed profile "${id}". Now run: yarn build:yul && yarn verify`);
+console.log(`removed profile "${id}". Now run: yarn verify`);

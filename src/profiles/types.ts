@@ -44,18 +44,6 @@ export interface Profile {
 
   /** Top-level field order of the RLP payload. */
   envelope: readonly EnvelopeField[];
-
-  /** New opcodes this devnet has, by name. Absent means the devnet does not have it (or we have not checked). */
-  opcodes: Partial<Record<OpcodeName, OpcodeSpec>>;
-  /** Parameter indices by opcode (`TXPARAM`, `FRAMEPARAM`, `SIGPARAM`, `TXTRACE`), name -> index. */
-  params: Partial<Record<ParamOpcode, Record<string, number>>>;
-
-  /** Compilation target for Yul. */
-  yul: {
-    evmVersion: "paris" | "shanghai" | "cancun";
-    /** Why this target, when it matters. */
-    note?: string;
-  };
 }
 
 /**
@@ -77,30 +65,3 @@ export type EnvelopeField =
   | "maxFeePerBlobGas"
   | "blobVersionedHashes"
   | "recentRootReferences";
-
-export type OpcodeName =
-  | "approve"
-  | "txParam"
-  | "frameDataLoad"
-  | "frameDataCopy"
-  | "frameParam"
-  | "sigParam"
-  | "sigDataCopy"
-  | "txTrace"
-  | "eventDataCopy";
-
-export type ParamOpcode = "txParam" | "frameParam" | "sigParam" | "txTrace";
-
-export interface OpcodeSpec {
-  byte: number;
-  /** Operand names, top of the stack first, as in the EIP's stack table. */
-  stack: readonly string[];
-  outputs: 0 | 1;
-  /**
-   *  - `devnet`: exercised on this devnet (by a workshop or a test), so the byte and the stack order are known good
-   *  - `spec`: taken from the EIP text, not yet exercised on this devnet; may differ from what the client implements
-   */
-  verified: "devnet" | "spec";
-  /** Where the byte came from: an EIP section, a client commit, a workshop step. */
-  source: string;
-}

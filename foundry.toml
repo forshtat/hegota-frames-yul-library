@@ -1,0 +1,12 @@
+[profile.default]
+src = "contracts"
+test = "test/sol"
+out = "out"
+libs = []
+solc_version = "0.8.28"
+# paris: no PUSH0, so the helpers also run on clients that predate it. The old workshop helpers avoided it too.
+evm_version = "paris"
+optimizer = false
+# The lint pass parses .yul as Solidity.
+[lint]
+ignore = ["yul/**"]

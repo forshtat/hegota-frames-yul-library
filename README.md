@@ -10,7 +10,7 @@ The library is two independent pieces:
 | | Import | What it is |
 |---|---|---|
 | **TypeScript tooling** | `hegota-frames/tx` | Build, encode, decode, hash and sign frame transactions for a profile |
-| **Yul API for frames** | `hegota-frames/yul` | Named Yul functions for the frame opcodes (`approve`, `sigparam`, `txtrace`, ...), a compiler wrapper, and ready-made helper contracts |
+| **Frame opcodes in Solidity** | `hegota-frames/contracts/HegotaSupport.sol` | An abstract contract: `approve`, `txparam`, `sigparam`, `txtrace`, ... as Solidity functions, with named parameter ids |
 | Profiles | `hegota-frames/profiles` | The registry, and `hegota-frames/profiles/<id>` for a single profile |
 
 > Not published to npm yet (`"private": true`). Depend on it by git URL until the first release.
@@ -46,44 +46,67 @@ Importing a single profile file (as above) pulls in only that profile. `getProfi
 `hegota-frames/profiles` look them up by id and pull in all of them. A frame mode a profile does not have is an
 error that names the modes it does have: `frame(profile, "POST_TX", ...)` throws on the tracer profile.
 
-## The Yul API
+## HegotaSupport: the frame opcodes in Solidity
 
-Solidity cannot emit the frame opcodes. Yul can, with `verbatim`, and this library gives each opcode a name.
-Operands are always listed **top of the stack first**, exactly as in the EIP's stack tables.
+Solidity cannot emit the frame opcodes. `HegotaSupport` gives every one of them a function. Inherit it and name your
+devnet:
 
-```ts
-import { profile } from "hegota-frames/profiles/ethrex-eip8141-tracer";
-import { compileYul, prelude } from "hegota-frames/yul";
+```solidity
+import {HegotaSupport} from "hegota-frames/contracts/HegotaSupport.sol";
+import {Devnet} from "hegota-frames/contracts/Devnet.sol";
+import {Scope, SigParam} from "hegota-frames/contracts/Params.sol";
 
-const { bytecode } = compileYul(profile, "approver", `approve(0, 0, calldataload(0))`);
-console.log(prelude(profile)); // every function and constant you can call, with its opcode and how well it is verified
+contract VasiliyPaymaster is HegotaSupport(Devnet.ERC8421_WORKSHOP) {
+    address public immutable OWNER = msg.sender;
+
+    fallback() external {
+        require(address(uint160(sigparam(0, SigParam.RESOLVED_SIGNER))) == OWNER, "bad signer");
+        approve(Scope.PAYMENT);
+    }
+}
 ```
 
-`prelude(profile)` defines, for that profile only:
+| Function | Opcode | Devnets |
+|---|---|---|
+| `approve(scope)` | APPROVE | `ERC8421_WORKSHOP` |
+| `txparam(param)` | TXPARAM | `ERC8421_WORKSHOP` |
+| `framedataload(offset, frameIndex)` | FRAMEDATALOAD | `ERC8421_WORKSHOP` |
+| `framedatacopy(dataOffset, length, frameIndex)` | FRAMEDATACOPY | `ERC8421_WORKSHOP` |
+| `frameparam(frameIndex, param)` | FRAMEPARAM | `ERC8421_WORKSHOP` |
+| `sigparam(signatureIndex, param)` | SIGPARAM | `ERC8421_WORKSHOP` |
+| `sigdatacopy(dataOffset, length, signatureIndex)` | SIGDATACOPY | `ERC8421_WORKSHOP` |
+| `txtrace(in2, param)` | TXTRACE | `EIP7906_WORKSHOP` |
+| `eventdatacopy(eventIndex, dataOffset, length)` | EVENTDATACOPY | `EIP7906_WORKSHOP` |
 
-- opcodes: `approve(offset, length, scope)`, `txparam(param)`, `frameparam(frameIndex, param)`,
-  `sigparam(signatureIndex, param)`, `framedataload`, `framedatacopy`, `sigdatacopy`; on the 7906 profile
-  `txtrace(in2, param)` and `eventdatacopy(eventIndex, memOffset, dataOffset, length)`
-- parameter constants: `TXPARAM_NONCE()`, `FRAMEPARAM_MODE()`, `SIGPARAM_RESOLVED_SIGNER()`, `TXTRACE_BALANCE_AFTER()`
-- `FRAME_MODE_VERIFY()`, `APPROVE_EXECUTION_AND_PAYMENT()`, `SIG_SCHEME_SECP256K1()`
+- **Same operands as the opcode**, in the order of the EIP's stack table (top of the stack first), minus operands that
+  only mean something inside the helper: the destination of a copy (the copy returns `bytes memory` instead) and
+  the return range of `approve`. So `txtrace` takes `in2` first.
+- **Named ids.** `TxParam`, `FrameParam`, `SigParam`, `TxTrace` and `Scope` are enums with the EIPs' names, and each
+  member's number is its id (`uint256(TxParam.NONCE) == 1`). An id the EIP leaves unassigned is kept as an
+  `UNASSIGNED_<hex>` member so the numbers stay true.
+- **Inherit, don't call.** `APPROVE` acts on the account that executes it, so `HegotaSupport` has to be part of your
+  contract. The constructor deploys one small Yul helper per opcode (with `CREATE`, so every contract owns its
+  helpers) and keeps their addresses as immutables: no storage.
+- **A missing opcode reverts** with `OpcodeUnsupported(devnet, opcode)`; a devnet that lacks a helper file lacks the
+  opcode.
+- Reads are `view` (the helper is `staticcall`ed); `approve` is `delegatecall`ed.
 
-Using something the profile does not define fails before the compiler runs, with the profile and the name:
-`Profile "ethrex-hegota-devnet" does not define: opcode approve()`.
+Where the Yul lives: `yul/<devnet>/<Opcode>.yul`, one file per opcode per devnet, each with a header saying where the
+opcode byte came from and whether it was exercised on the devnet. `yarn build:helpers` compiles them (solc-js,
+optimizer off, `paris`) into `contracts/generated/HelperCode.sol`, the only place Solidity can read the creation code
+from. Nothing outside `yul/` contains an opcode byte.
 
-`compileYul` needs `solc` (an optional peer dependency, pinned to `0.8.28` so output is reproducible). Consumers
-that do not want a compiler use the prebuilt contracts:
+Mapping to profiles: `ERC8421_WORKSHOP` is `ethrex-eip8141-tracer` (chain 1337) and `EIP7906_WORKSHOP` is
+`ethrex-hegota-devnet` (chain 3151908).
 
-```ts
-import { prebuilt } from "hegota-frames/yul/prebuilt";
-const approverInitCode = prebuilt("ethrex-eip8141-tracer", "approver"); // creation bytecode, no solc needed
-```
+### How much to trust a helper
 
-| Contract | What it does |
-|---|---|
-| `approver` | `APPROVE` with the scope from calldata. `delegatecall` it from VERIFY-frame code (APPROVE acts on the executing account) |
-| `signerReader` | Returns the resolved signer of signature 0. `staticcall` it from VERIFY-frame code |
-
-A contract exists for a profile only if the profile has the opcodes it needs.
+- *Verified on the devnet* (`APPROVE`, `SIGPARAM` on `ERC8421_WORKSHOP`; `TXTRACE`, `EVENTDATACOPY` on
+  `EIP7906_WORKSHOP`): exercised by a workshop, so the byte and operand order are known good.
+- *From the EIP text*: the rest. They may differ from what the client implements.
+- The 8141 helpers are not provided for `EIP7906_WORKSHOP` until something exercises them there.
+- Forge and Hardhat's simulated chains do not know these opcodes, so `yarn test:sol` checks the wiring (which
+  helper each devnet gets, its code, the ids) and not the opcodes themselves. Those run only on a devnet.
 
 ## Profiles
 
@@ -95,17 +118,7 @@ A contract exists for a profile only if the profile has the opcodes it needs.
 The two layouts differ on the wire, so the same transaction encodes differently under each. Decoding with the
 wrong profile fails with a count mismatch instead of misreading.
 
-### How much to trust an opcode
-
-Each opcode in a profile carries `verified` and `source`:
-
-- `devnet`: exercised on that devnet by a workshop or a test. The byte and the stack order are known good.
-- `spec`: copied from the EIP text. May differ from what the client implements.
-
-The 7906 profile deliberately lists only `TXTRACE` and `EVENTDATACOPY` until something exercises the 8141
-opcodes there.
-
-### Where devnets already differ from the EIP text
+## Where devnets already differ from the EIP text
 
 - **8272 recent roots.** Both devnets carry a top-level `recent_root_references` payload field. The current EIP
   text has no such field: tuples travel in the data of a VERIFY frame sent to `RECENT_ROOT_ADDRESS`
@@ -117,21 +130,21 @@ opcodes there.
 ## Adding, retiring and removing a profile
 
 See [docs/adding-a-profile.md](docs/adding-a-profile.md). In short: `yarn new-profile <id> --from <other> --supersede`,
-edit the new file, `yarn pin-vectors <id>`, `yarn build:yul`, `yarn verify`. The old profile stays, marked
+edit the new file, `yarn pin-vectors <id>`, `yarn verify`. The old profile stays, marked
 `legacy`, and keeps producing the same bytes: its pinned test vectors fail if anything changes them.
 
 ## Not here yet
 
 - Skandha's `eth_sendFrameTransaction` JSON shape (still in the workshops)
 - Workshop-level transaction builders with their gas numbers (they stay in the workshops)
-- 8141 introspection opcodes on the 7906 profile (unverified there)
+- 8141 introspection helpers on `EIP7906_WORKSHOP` (unverified there)
 
 ## Development
 
 ```sh
 yarn install
-yarn verify        # typecheck, test, build, smoke-test the exports, check the generated Yul is current
+yarn verify        # typecheck, test, build, smoke-test the exports, check the generated HelperCode.sol, forge test
 ```
 
-Tests run on Node's built-in runner after compiling with `tsc`; there is no test framework dependency. CI runs
+The Solidity tests need [Foundry](https://getfoundry.sh) (`forge test`, no libraries). The TypeScript tests run on Node's built-in runner after compiling with `tsc`. CI runs
 `yarn verify` on Node 20, 22 and 24.

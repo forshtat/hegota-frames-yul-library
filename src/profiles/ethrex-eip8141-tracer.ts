@@ -4,9 +4,7 @@ import type { Profile } from "./types.js";
  * The public EIP-8141 / alt-mempool devnet (chain 1337): ethrex `eip8141-tracer` plus the Skandha alt-mempool.
  * This is the layout Skandha's own codec (`FrameTxService/codec.ts`) uses, and the one the mempool workshop sends.
  *
- * Opcode bytes and stack orders marked `devnet` were exercised by the mempool workshop (wallets approve with
- * `APPROVE` and read the signer with `SIGPARAM`). The rest come from the EIP-8141 text (as of 2026-10-24) and are
- * marked `spec` until something exercises them here.
+ * The devnet's opcodes are not described here: they are the Yul helpers in `yul/erc8421-workshop/`.
  */
 export const profile: Profile = {
   id: "ethrex-eip8141-tracer",
@@ -48,86 +46,4 @@ export const profile: Profile = {
     "blobVersionedHashes",
     "recentRootReferences",
   ],
-
-  opcodes: {
-    approve: {
-      byte: 0xaa,
-      stack: ["offset", "length", "scope"],
-      outputs: 0,
-      verified: "devnet",
-      source: "mempool workshop: approver runtime 60003560006000aa; EIP-8141 APPROVE (ends the frame like RETURN)",
-    },
-    txParam: { byte: 0xb0, stack: ["param"], outputs: 1, verified: "spec", source: "EIP-8141 TXPARAM" },
-    frameDataLoad: { byte: 0xb1, stack: ["offset", "frameIndex"], outputs: 1, verified: "spec", source: "EIP-8141 FRAMEDATALOAD" },
-    frameDataCopy: {
-      byte: 0xb2,
-      stack: ["memOffset", "dataOffset", "length", "frameIndex"],
-      outputs: 0,
-      verified: "spec",
-      source: "EIP-8141 FRAMEDATACOPY",
-    },
-    frameParam: { byte: 0xb3, stack: ["frameIndex", "param"], outputs: 1, verified: "spec", source: "EIP-8141 FRAMEPARAM" },
-    sigParam: {
-      byte: 0xb4,
-      stack: ["signatureIndex", "param"],
-      outputs: 1,
-      verified: "devnet",
-      source: "mempool workshop: signer-reader runtime 60006000b460005260206000f3 (SIGPARAM(0, RESOLVED_SIGNER)); EIP-8141 SIGPARAM",
-    },
-    sigDataCopy: {
-      byte: 0xb5,
-      stack: ["memOffset", "dataOffset", "length", "signatureIndex"],
-      outputs: 0,
-      verified: "spec",
-      source: "EIP-8141 SIGDATACOPY",
-    },
-  },
-
-  params: {
-    // EIP-8141 Introspection tables; EIP-8250 adds 0x0d-0x10. 0x05 is unlisted in the EIP text, and the EIP does
-    // not list 0x06 either: ethrex answers it with the transaction's maximum cost (Skandha reads it as `maxCost`).
-    txParam: {
-      TYPE: 0x00,
-      NONCE: 0x01,
-      SENDER: 0x02,
-      MAX_PRIORITY_FEE_PER_GAS: 0x03,
-      MAX_FEE: 0x04,
-      MAX_COST: 0x06,
-      BLOB_COUNT: 0x07,
-      SIG_HASH: 0x08,
-      FRAME_COUNT: 0x09,
-      CURRENT_FRAME_INDEX: 0x0a,
-      SIGNATURE_COUNT: 0x0b,
-      STATE_GAS_LEFT: 0x0c,
-      LEGACY_NONCE: 0x0d,
-      NONCE_KEY_COUNT: 0x0e,
-      NONCE_KEYS_HASH: 0x0f,
-      NONCE_KEY_0: 0x10,
-    },
-    frameParam: {
-      RESOLVED_TARGET: 0x00,
-      EXECUTION_GAS_LIMIT: 0x01,
-      MODE: 0x02,
-      FLAGS: 0x03,
-      DATA_LENGTH: 0x04,
-      STATUS: 0x05,
-      ALLOWED_SCOPE: 0x06,
-      ATOMIC_BATCH: 0x07,
-      VALUE: 0x08,
-      STATE_GAS_LIMIT: 0x09,
-      EXECUTION_GAS_USED: 0x0a,
-      STATE_GAS_USED: 0x0b,
-    },
-    sigParam: {
-      RESOLVED_SIGNER: 0x00,
-      SCHEME: 0x01,
-      MSG: 0x02,
-      SIGNATURE_LENGTH: 0x03,
-    },
-  },
-
-  yul: {
-    evmVersion: "paris",
-    note: "the workshop's hand-written helpers avoided PUSH0; why is not recorded, so the target stays at paris until someone checks",
-  },
 };

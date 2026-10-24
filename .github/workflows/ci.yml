@@ -40,5 +40,10 @@ jobs:
       - name: Smoke test the package exports
         run: yarn smoke
 
-      - name: Generated Yul bytecode is up to date
-        run: yarn check:yul
+      - name: Generated Yul creation code is up to date
+        run: yarn check:helpers
+
+      - uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Solidity tests
+        run: yarn test:sol

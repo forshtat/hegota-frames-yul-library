@@ -47,7 +47,6 @@ if (supersede) {
 
 console.log(`created src/profiles/${newId}.ts from ${fromId} and registered it${supersede ? `; ${fromId} is now legacy` : ""}.
 Next:
-  1. edit src/profiles/${newId}.ts: devnet, eips, envelope, modes, opcodes, params, yul target
+  1. edit src/profiles/${newId}.ts: devnet, eips, envelope, modes, schemes
   2. yarn pin-vectors ${newId}   (writes test/vectors/${newId}.ts; review the diff against the client)
-  3. yarn build:yul                  (writes src/yul/generated/ for the new profile)
-  4. yarn verify`);
+  3. yarn verify`);
