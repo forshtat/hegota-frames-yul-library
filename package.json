@@ -1,0 +1,69 @@
+{
+  "name": "hegota-frames",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Helpers for the Hegota frame-transaction EIPs (8141, 8250, 7906, ...): a profile-driven TypeScript codec and a Yul API for frame opcodes, with one named profile per devnet",
+  "type": "module",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/forshtat/hegota-frames-yul-library.git"
+  },
+  "engines": {
+    "node": ">=20.12"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "exports": {
+    "./profiles": {
+      "types": "./dist/profiles/index.d.ts",
+      "default": "./dist/profiles/index.js"
+    },
+    "./profiles/*": {
+      "types": "./dist/profiles/*.d.ts",
+      "default": "./dist/profiles/*.js"
+    },
+    "./tx": {
+      "types": "./dist/tx/index.d.ts",
+      "default": "./dist/tx/index.js"
+    },
+    "./yul": {
+      "types": "./dist/yul/index.d.ts",
+      "default": "./dist/yul/index.js"
+    },
+    "./yul/prebuilt": {
+      "types": "./dist/yul/prebuilt.d.ts",
+      "default": "./dist/yul/prebuilt.js"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.build.json",
+    "build:tools": "node -e \"require('fs').rmSync('build',{recursive:true,force:true})\" && tsc -p tsconfig.test.json",
+    "build:yul": "yarn build:tools && node build/scripts/build-yul.js",
+    "check:yul": "yarn build:yul && git diff --exit-code -- src/yul/generated",
+    "test": "yarn build:tools && node --test build/test/*.test.js",
+    "new-profile": "yarn --silent build:tools && node build/scripts/new-profile.js",
+    "remove-profile": "yarn --silent build:tools && node build/scripts/remove-profile.js",
+    "pin-vectors": "yarn --silent build:tools && node build/scripts/pin-vectors.js",
+    "smoke": "node scripts/smoke.mjs",
+    "verify": "yarn typecheck && yarn test && yarn build && yarn smoke && yarn check:yul"
+  },
+  "peerDependencies": {
+    "solc": "0.8.28",
+    "viem": "^2.57.0"
+  },
+  "peerDependenciesMeta": {
+    "solc": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "solc": "0.8.28",
+    "typescript": "^5.9.3",
+    "viem": "^2.57.10"
+  }
+}
