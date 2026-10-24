@@ -3,6 +3,7 @@
  * not run `prepare` for git dependencies. Build it here, only when it is missing: a published tarball ships `dist/`.
  */
 import fs from "node:fs";
+import path from "node:path";
 import { createRequire } from "node:module";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
@@ -12,7 +13,9 @@ if (!fs.existsSync(`${root}dist`) && fs.existsSync(`${root}tsconfig.build.json`)
   // yarn does not install a git dependency's devDependencies, so use the typescript the consumer already has
   let tsc;
   try {
-    tsc = createRequire(import.meta.url).resolve("typescript/bin/tsc");
+    // not "typescript/bin/tsc": typescript 7 restricts its exports to package.json, so read the bin entry from there
+    const manifest = createRequire(import.meta.url).resolve("typescript/package.json");
+    tsc = path.join(path.dirname(manifest), JSON.parse(fs.readFileSync(manifest, "utf8")).bin.tsc);
   } catch {
     console.error('hegota-frames: dist/ is missing and no "typescript" is installed to build it; add typescript to your devDependencies');
     process.exit(1);
