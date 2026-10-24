@@ -49,7 +49,7 @@
     "build:helpers": "node scripts/build-helpers.mjs",
     "check:helpers": "yarn build:helpers && git diff --exit-code -- contracts/generated",
     "test:sol": "forge test",
-    "prepare": "yarn build",
+    "prepare": "node scripts/postinstall.mjs",
     "postinstall": "node scripts/postinstall.mjs"
   },
   "peerDependencies": {
