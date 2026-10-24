@@ -52,9 +52,7 @@ Solidity cannot emit the frame opcodes. `HegotaSupport` gives every one of them 
 devnet:
 
 ```solidity
-import {HegotaSupport} from "hegota-frames/contracts/HegotaSupport.sol";
-import {Devnet} from "hegota-frames/contracts/Devnet.sol";
-import {Scope, SigParam} from "hegota-frames/contracts/Params.sol";
+import {HegotaSupport, Devnet, Scope, SigParam} from "hegota-frames/contracts/HegotaSupport.sol";
 
 contract VasiliyPaymaster is HegotaSupport(Devnet.ERC8421_WORKSHOP) {
     address public immutable OWNER = msg.sender;

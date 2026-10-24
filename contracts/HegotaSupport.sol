@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.28;
 
+// Imported here and so importable from this file: a contract needs one import for the base and the names it passes
+// to its functions, e.g. `import {HegotaSupport, Devnet, TxTrace} from "hegota-frames/contracts/HegotaSupport.sol";`.
 import {Devnet} from "./Devnet.sol";
 import {Opcode} from "./Opcode.sol";
-import {Scope, TxParam, FrameParam, SigParam, TxTrace} from "./Params.sol";
+import {Scope, TxParam, FrameParam, FrameMode, SigParam, TxTrace} from "./Params.sol";
 import {HelperCalls} from "./internal/HelperCalls.sol";
 import {HelperCode} from "./generated/HelperCode.sol";
 
