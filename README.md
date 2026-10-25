@@ -10,6 +10,7 @@ The library is two independent pieces:
 | | Import | What it is |
 |---|---|---|
 | **TypeScript tooling** | `hegota-frames/tx` | Build, encode, decode, hash and sign frame transactions for a profile |
+| **JSON-RPC wire format** | `hegota-frames/rpc` | `toWire(tx)`: the JSON the sidecar's `eth_sendFrameTransaction` takes |
 | **Frame opcodes in Solidity** | `hegota-frames/contracts/HegotaSupport.sol` | An abstract contract: `approve`, `txparam`, `sigparam`, `txtrace`, ... as Solidity functions, with named parameter ids |
 | Profiles | `hegota-frames/profiles` | The registry, and `hegota-frames/profiles/<id>` for a single profile |
 
@@ -137,7 +138,6 @@ edit the new file, `yarn pin-vectors <id>`, `yarn verify`. The old profile stays
 
 ## Not here yet
 
-- Skandha's `eth_sendFrameTransaction` JSON shape (still in the workshops)
 - Workshop-level transaction builders with their gas numbers (they stay in the workshops)
 - `SIGDATACOPY` on `EIP7906_WORKSHOP` (the devnet halts on `0xb5`); `TXDIFF` (`0xb8`), whose stack layout is not recorded
 

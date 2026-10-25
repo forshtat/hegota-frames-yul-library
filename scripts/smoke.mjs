@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { profiles } from "hegota-frames/profiles";
 import { profile as tracer } from "hegota-frames/profiles/ethrex-eip8141-tracer";
 import { profile as hegota } from "hegota-frames/profiles/ethrex-hegota-devnet";
+import { toWire } from "hegota-frames/rpc";
 import { encodeTx, frame, newTx, secp256k1Placeholder } from "hegota-frames/tx";
 
 assert.deepEqual(Object.keys(profiles).sort(), [hegota.id, tracer.id].sort());
@@ -15,4 +16,5 @@ const tx = newTx({
   frames: [frame(tracer, "VERIFY", { scope: "EXECUTION_AND_PAYMENT", execution: 1n })],
 });
 assert.ok(encodeTx(tracer, tx).startsWith("0x06"));
+assert.equal(toWire(tx).chainId, "0x539");
 console.log("smoke ok");

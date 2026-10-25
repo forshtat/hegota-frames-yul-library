@@ -31,6 +31,10 @@
       "types": "./dist/tx/index.d.ts",
       "default": "./dist/tx/index.js"
     },
+    "./rpc": {
+      "types": "./dist/rpc/index.d.ts",
+      "default": "./dist/rpc/index.js"
+    },
     "./solidity": {
       "types": "./dist/solidity/index.d.ts",
       "default": "./dist/solidity/index.js"
