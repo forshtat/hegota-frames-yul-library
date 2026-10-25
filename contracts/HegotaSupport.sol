@@ -2,7 +2,7 @@
 pragma solidity 0.8.28;
 
 // Imported here and so importable from this file: a contract needs one import for the base and the names it passes
-// to its functions, e.g. `import {HegotaSupport, Devnet, TxTrace} from "hegota-frames/contracts/HegotaSupport.sol";`.
+// to its functions, e.g. `import {HegotaSupport, Devnet, TxTrace} from "@forshtat/hegota-support/contracts/HegotaSupport.sol";`.
 import {Devnet} from "./Devnet.sol";
 import {Opcode} from "./Opcode.sol";
 import {Scope, TxParam, FrameParam, FrameMode, SigParam, TxTrace} from "./Params.sol";

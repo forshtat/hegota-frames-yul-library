@@ -32,25 +32,25 @@ function packageRoot(): string {
   let dir = path.dirname(fileURLToPath(import.meta.url));
   while (!fs.existsSync(path.join(dir, "contracts", "HegotaSupport.sol"))) {
     const up = path.dirname(dir);
-    if (up === dir) throw new Error("hegota-frames: cannot find its contracts/ directory");
+    if (up === dir) throw new Error("@forshtat/hegota-support: cannot find its contracts/ directory");
     dir = up;
   }
   return dir;
 }
 
 /**
- * Compiles one Solidity source with solc-js, so no toolchain is needed. `import "hegota-frames/contracts/..."` resolves
+ * Compiles one Solidity source with solc-js, so no toolchain is needed. `import "@forshtat/hegota-support/contracts/..."` resolves
  * to the contracts this package ships. Any other import is an error: pass a self-contained source.
  *
  * Compile with solc 0.8.28; HegotaSupport pins `pragma solidity 0.8.28`.
  */
 export function compileSolidity(name: string, source: string, options: CompileOptions = {}): CompiledContract {
   const root = packageRoot();
-  const prefix = "hegota-frames/";
+  const prefix = "@forshtat/hegota-support/";
   const findImports = (importPath: string) => {
     if (!importPath.startsWith(prefix)) return { error: `cannot import "${importPath}": only "${prefix}contracts/..." resolves` };
     const file = path.join(root, importPath.slice(prefix.length));
-    return fs.existsSync(file) ? { contents: fs.readFileSync(file, "utf8") } : { error: `no such file in hegota-frames: ${importPath}` };
+    return fs.existsSync(file) ? { contents: fs.readFileSync(file, "utf8") } : { error: `no such file in @forshtat/hegota-support: ${importPath}` };
   };
   const out = JSON.parse(
     loadSolc().compile(

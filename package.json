@@ -1,13 +1,12 @@
 {
-  "name": "hegota-frames",
-  "version": "0.0.0",
-  "private": true,
+  "name": "@forshtat/hegota-support",
+  "version": "0.0.1",
   "description": "Helpers for the Hegota frame-transaction EIPs (8141, 8250, 7906, ...): HegotaSupport.sol, which gives Solidity the frame opcodes, and a profile-driven TypeScript codec for the transactions",
   "type": "module",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/forshtat/hegota-frames-yul-library.git"
+    "url": "git+https://github.com/forshtat/hegota-support.git"
   },
   "engines": {
     "node": ">=20.12"
@@ -54,8 +53,7 @@
     "build:helpers": "node scripts/build-helpers.mjs",
     "check:helpers": "yarn build:helpers && git diff --exit-code -- contracts/generated",
     "test:sol": "forge test",
-    "prepare": "node scripts/postinstall.mjs",
-    "postinstall": "node scripts/postinstall.mjs"
+    "prepack": "yarn build"
   },
   "peerDependencies": {
     "viem": "^2.57.0",
@@ -71,5 +69,19 @@
     "solc": {
       "optional": true
     }
+  },
+  "homepage": "https://github.com/forshtat/hegota-support#readme",
+  "bugs": {
+    "url": "https://github.com/forshtat/hegota-support/issues"
+  },
+  "keywords": [
+    "eip-8141",
+    "frame-transactions",
+    "hegota",
+    "ethereum",
+    "solidity"
+  ],
+  "publishConfig": {
+    "access": "public"
   }
 }

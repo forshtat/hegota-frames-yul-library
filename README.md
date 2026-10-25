@@ -1,4 +1,4 @@
-# hegota-frames
+# @forshtat/hegota-support
 
 Helpers for the Hegota frame-transaction EIPs: **8141** (frame transactions), **8250** (keyed nonces),
 **8272** (recent roots) and **7906** (transaction assertions). The EIPs are moving, and every devnet
@@ -9,12 +9,16 @@ The library is two independent pieces:
 
 | | Import | What it is |
 |---|---|---|
-| **TypeScript tooling** | `hegota-frames/tx` | Build, encode, decode, hash and sign frame transactions for a profile |
-| **JSON-RPC wire format** | `hegota-frames/rpc` | `toWire(tx)`, `rpc()` (a JSON-RPC call that throws `RpcError`), `explainRejection()` (node error text to a rule family) |
-| **Frame opcodes in Solidity** | `hegota-frames/contracts/HegotaSupport.sol` | An abstract contract: `approve`, `txparam`, `sigparam`, `txtrace`, ... as Solidity functions, with named parameter ids |
-| Profiles | `hegota-frames/profiles` | The registry, and `hegota-frames/profiles/<id>` for a single profile |
+| **TypeScript tooling** | `@forshtat/hegota-support/tx` | Build, encode, decode, hash and sign frame transactions for a profile |
+| **JSON-RPC wire format** | `@forshtat/hegota-support/rpc` | `toWire(tx)`, `rpc()` (a JSON-RPC call that throws `RpcError`), `explainRejection()` (node error text to a rule family) |
+| **Frame opcodes in Solidity** | `@forshtat/hegota-support/contracts/HegotaSupport.sol` | An abstract contract: `approve`, `txparam`, `sigparam`, `txtrace`, ... as Solidity functions, with named parameter ids |
+| Profiles | `@forshtat/hegota-support/profiles` | The registry, and `@forshtat/hegota-support/profiles/<id>` for a single profile |
 
 > Not published to npm yet (`"private": true`). Depend on it by git URL until the first release.
+
+```sh
+yarn add @forshtat/hegota-support viem
+```
 
 ## Pick a profile explicitly
 
@@ -22,8 +26,8 @@ There is no default profile and no "current devnet". Every function takes the pr
 script written for one devnet keeps working, byte for byte, after another devnet appears.
 
 ```ts
-import { profile } from "hegota-frames/profiles/ethrex-eip8141-tracer";
-import { frame, newTx, secp256k1Placeholder, signTx, encodeTx, txHash } from "hegota-frames/tx";
+import { profile } from "@forshtat/hegota-support/profiles/ethrex-eip8141-tracer";
+import { frame, newTx, secp256k1Placeholder, signTx, encodeTx, txHash } from "@forshtat/hegota-support/tx";
 
 const tx = await signTx(
   profile,
@@ -44,7 +48,7 @@ const raw = encodeTx(profile, tx); // 0x06 || rlp(payload), laid out the way thi
 ```
 
 Importing a single profile file (as above) pulls in only that profile. `getProfile(id)` and `profiles` from
-`hegota-frames/profiles` look them up by id and pull in all of them. A frame mode a profile does not have is an
+`@forshtat/hegota-support/profiles` look them up by id and pull in all of them. A frame mode a profile does not have is an
 error that names the modes it does have: `frame(profile, "POST_TX", ...)` throws on the tracer profile.
 
 ## HegotaSupport: the frame opcodes in Solidity
@@ -53,7 +57,7 @@ Solidity cannot emit the frame opcodes. `HegotaSupport` gives every one of them 
 devnet:
 
 ```solidity
-import {HegotaSupport, Devnet, Scope, SigParam} from "hegota-frames/contracts/HegotaSupport.sol";
+import {HegotaSupport, Devnet, Scope, SigParam} from "@forshtat/hegota-support/contracts/HegotaSupport.sol";
 
 contract VasiliyPaymaster is HegotaSupport(Devnet.ERC8421_WORKSHOP) {
     address public immutable OWNER = msg.sender;
