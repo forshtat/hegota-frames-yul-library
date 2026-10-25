@@ -10,7 +10,7 @@ The library is two independent pieces:
 | | Import | What it is |
 |---|---|---|
 | **TypeScript tooling** | `hegota-frames/tx` | Build, encode, decode, hash and sign frame transactions for a profile |
-| **JSON-RPC wire format** | `hegota-frames/rpc` | `toWire(tx)`: the JSON the sidecar's `eth_sendFrameTransaction` takes |
+| **JSON-RPC wire format** | `hegota-frames/rpc` | `toWire(tx)`, `rpc()` (a JSON-RPC call that throws `RpcError`), `explainRejection()` (node error text to a rule family) |
 | **Frame opcodes in Solidity** | `hegota-frames/contracts/HegotaSupport.sol` | An abstract contract: `approve`, `txparam`, `sigparam`, `txtrace`, ... as Solidity functions, with named parameter ids |
 | Profiles | `hegota-frames/profiles` | The registry, and `hegota-frames/profiles/<id>` for a single profile |
 
